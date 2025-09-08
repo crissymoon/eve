@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Pass Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #2a0a0a 100%);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(20, 20, 20, 0.9);
+            border: 2px solid #8b0000;
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #8b0000;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #8b0000;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #cccccc;
+            margin-bottom: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 1px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            background: #000000;
+            border: 1px solid #666666;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #8b0000;
+            box-shadow: 0 0 5px rgba(139, 0, 0, 0.5);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #8b0000, #a00000);
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #a00000, #c00000);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(139, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #333333, #555555);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(45deg, #555555, #777777);
+        }
+
+        .output-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #8b0000;
+        }
+
+        .output {
+            background: #000000;
+            border: 1px solid #333333;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #00ff00;
+            min-height: 100px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            color: #ff4444;
+        }
+
+        .success {
+            color: #44ff44;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .status-ready {
+            background: #44ff44;
+        }
+
+        .status-processing {
+            background: #ffff44;
+        }
+
+        .status-error {
+            background: #ff4444;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Data Pass Interface</h1>
+            <p><span class="status-indicator status-ready"></span>System Ready</p>
+        </div>
+
+        <form id="dataForm" class="form-section">
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone">
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <select id="category" name="category" required>
+                    <option value="">Select Category</option>
+                    <option value="contact">Contact Request</option>
+                    <option value="support">Support Ticket</option>
+                    <option value="feedback">Feedback</option>
+                    <option value="inquiry">General Inquiry</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" placeholder="Enter your message here..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="priority">Priority Level</label>
+                <select id="priority" name="priority">
+                    <option value="low">Low</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="high">High</option>
+                    <option value="urgent">Urgent</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="btn">Submit Data</button>
+                <button type="button" class="btn btn-secondary" onclick="clearForm()">Clear Form</button>
+                <button type="button" class="btn btn-secondary" onclick="loadData()">View Data</button>
+                <button type="button" class="btn btn-secondary" onclick="clearAllData()">Clear All Data</button>
+            </div>
+        </form>
+
+        <div class="output-section">
+            <label>System Output</label>
+            <div id="output" class="output">System initialized. Ready to process data.\n</div>
+        </div>
+    </div>
+
+    <script>
+        class DataPassInterface {
+            constructor() {
+                this.form = document.getElementById('dataForm');
+                this.output = document.getElementById('output');
+                this.statusIndicator = document.querySelector('.status-indicator');
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+                
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        this.handleSubmit(e);
+                    }
+                });
+            }
+
+            async handleSubmit(e) {
+                e.preventDefault();
+                this.setStatus('processing');
+                
+                const formData = new FormData(this.form);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    const result = await this.processData(data);
+                    this.displayResult(result);
+                    
+                    if (result.success) {
+                        this.setStatus('ready');
+                        this.clearForm();
+                    } else {
+                        this.setStatus('error');
+                    }
+                } catch (error) {
+                    this.displayError(`System error: ${error.message}`);
+                    this.setStatus('error');
+                }
+            }
+
+            async processData(data) {
+                this.appendOutput(`Processing data submission...`);
+                
+                const payload = {
+                    ...data,
+                    user_agent: navigator.userAgent,
+                    timestamp: new Date().toISOString(),
+                    session_id: this.generateSessionId()
+                };
+
+                this.appendOutput(`Data validated and prepared for transmission.`);
+                
+                try {
+                    const response = await fetch('/api/data-handler', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+
+                    const result = await response.json();
+                    return result;
+                } catch (fetchError) {
+                    this.appendOutput(`Network request failed. Using local processing...`);
+                    return this.processDataLocally(payload);
+                }
+            }
+
+            processDataLocally(data) {
+                const timestamp = new Date().toISOString();
+                const delimiter = "|-|-|-|-|";
+                
+                const formattedData = [
+                    `timestamp:${timestamp}`,
+                    `source:html_form`,
+                    ...Object.entries(data).map(([key, value]) => `${key}:${value}`)
+                ].join(delimiter);
+
+                const stored = localStorage.getItem('passed_info_data') || '';
+                const newData = stored ? stored + '\n' + formattedData : formattedData;
+                localStorage.setItem('passed_info_data', newData);
+
+                return {
+                    success: true,
+                    message: "Data processed and stored locally",
+                    timestamp: timestamp,
+                    errors: []
+                };
+            }
+
+            displayResult(result) {
+                if (result.success) {
+                    this.appendOutput(`SUCCESS: ${result.message}`, 'success');
+                    this.appendOutput(`Timestamp: ${result.timestamp}`, 'success');
+                } else {
+                    this.appendOutput(`ERROR: ${result.message}`, 'error');
+                    if (result.errors && result.errors.length > 0) {
+                        result.errors.forEach(error => {
+                            this.appendOutput(`  - ${error}`, 'error');
+                        });
+                    }
+                }
+            }
+
+            displayError(message) {
+                this.appendOutput(message, 'error');
+            }
+
+            appendOutput(message, type = 'normal') {
+                const timestamp = new Date().toLocaleTimeString();
+                const prefix = type === 'error' ? '[ERROR]' : type === 'success' ? '[SUCCESS]' : '[INFO]';
+                const line = `${timestamp} ${prefix} ${message}\n`;
+                
+                this.output.textContent += line;
+                this.output.scrollTop = this.output.scrollHeight;
+            }
+
+            setStatus(status) {
+                this.statusIndicator.className = `status-indicator status-${status}`;
+            }
+
+            clearForm() {
+                this.form.reset();
+                this.appendOutput('Form cleared.');
+            }
+
+            generateSessionId() {
+                return Math.random().toString(36).substring(2, 15) + 
+                       Math.random().toString(36).substring(2, 15);
+            }
+        }
+
+        function clearForm() {
+            dataInterface.clearForm();
+        }
+
+        function loadData() {
+            const stored = localStorage.getItem('passed_info_data');
+            if (stored) {
+                dataInterface.appendOutput('=== STORED DATA ===');
+                const entries = stored.split('\n');
+                entries.forEach((entry, index) => {
+                    if (entry.trim()) {
+                        dataInterface.appendOutput(`Entry ${index + 1}: ${entry}`);
+                    }
+                });
+                dataInterface.appendOutput('=== END DATA ===');
+            } else {
+                dataInterface.appendOutput('No stored data found.');
+            }
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all stored data?')) {
+                localStorage.removeItem('passed_info_data');
+                dataInterface.appendOutput('All stored data cleared.', 'success');
+            }
+        }
+
+        const dataInterface = new DataPassInterface();
+    </script>
+</body>
+</html>

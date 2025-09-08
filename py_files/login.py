@@ -1,3 +1,6 @@
+def read_passed_info(): 
+    with open("passed_info.txt") as f: return f.read() 
+
 def check_user(user: str, psswd: str):
     with open('../vault/users.txt', 'r') as f: 
         content = f.read()
@@ -16,9 +19,17 @@ def check_user(user: str, psswd: str):
 if __name__ == "__main__":
     print("'q' to quit")
     
+    check_info = True
+    while check_info:
+        info = read_passed_info()
+        split_delim = info.split("|-|-|-|-|")
+        check_user(split_delim[0], split_delim[1])
+        
+    
+    
     
     # Test logic for retriving info
-    run = True
+    run = False
     while run:
         usern = input("Enter your user name: ")
         if usern.lower().strip() == 'q': break
