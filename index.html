@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pyodide Python Runner</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: white;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .output {
+            background-color: black;
+            border: 2px solid #8b0000;
+            padding: 20px;
+            margin: 20px 0;
+            white-space: pre-wrap;
+            font-size: 16px;
+            line-height: 1.4;
+        }
+        
+        .loading {
+            color: #808080;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        h1 {
+            color: #8b0000;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Python Code Execution</h1>
+        <div id="loading" class="loading">Loading Pyodide...</div>
+        <div id="output" class="output" style="display: none;"></div>
+    </div>
+
+    <script src="python_interpreter.js"></script>
+    <script>
+        let interpreterReady = false;
+        
+        async function main() {
+            document.getElementById('loading').textContent = 'Loading Python interpreter...';
+            
+            try {
+                interpreterReady = true;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('output').style.display = 'block';
+                
+                // Load and run the file I/O test
+                const response = await fetch('file_io_test.py');
+                if (!response.ok) {
+                    throw new Error('Failed to load test file');
+                }
+                const pythonCode = await response.text();
+                
+                const result = await runPythonCode(pythonCode);
+                
+                if (result.success) {
+                    document.getElementById('output').textContent = result.output;
+                } else {
+                    document.getElementById('output').textContent = 'This data has not been trained yet.';
+                    console.error('Python execution error:', result.error);
+                }
+                
+            } catch (error) {
+                document.getElementById('loading').textContent = 'Operation did not work';
+                document.getElementById('output').style.display = 'block';
+                document.getElementById('output').textContent = 'This data has not been trained yet.';
+                console.error('Interpreter initialization error:', error);
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', main);
+    </script>
+</body>
+</html>

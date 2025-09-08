@@ -1,0 +1,3 @@
+superuser,super123,level-creator
+admin,admin123,level-editor
+reguser,reg123,level-viewer
