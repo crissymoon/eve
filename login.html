@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0a0a 50%, #2a0a0a 100%);
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: rgba(20, 20, 20, 0.9);
+            border: 2px solid #8b0000;
+            padding: 40px;
+            margin-top: 100px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid #8b0000;
+            padding-bottom: 20px;
+        }
+
+        .header h1 {
+            color: #8b0000;
+            font-size: 28px;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #8b0000;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            background: #000000;
+            border: 1px solid #8b0000;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #ff0000;
+            box-shadow: 0 0 10px rgba(139, 0, 0, 0.3);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(45deg, #8b0000, #ff0000);
+            border: none;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, #ff0000, #8b0000);
+        }
+
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #000000;
+            border: 1px solid #8b0000;
+            color: #ffffff;
+            font-size: 14px;
+            white-space: pre-wrap;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Login</h1>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit" class="btn">Login</button>
+        </form>
+
+        <div id="output" class="output">System ready.</div>
+    </div>
+
+    <script src="data_handler.js"></script>
+    <script>
+        const dataHandler = new DataHandler();
+        const loginForm = document.getElementById('loginForm');
+        const output = document.getElementById('output');
+
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            output.textContent = 'Processing login...';
+            
+            try {
+                const results = await dataHandler.processForm(
+                    loginForm, 
+                    'login.py', 
+                    'py_files/login_data.txt'
+                );
+                
+                let message = '';
+                if (results.dataWrite && results.dataWrite.success) {
+                    message += 'Login data saved.\n';
+                }
+                if (results.pythonExec && results.pythonExec.success) {
+                    message += 'Login processed:\n' + results.pythonExec.output;
+                }
+                
+                output.textContent = message || 'Login completed';
+                
+            } catch (error) {
+                output.textContent = 'Login failed: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

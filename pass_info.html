@@ -255,233 +255,82 @@
         </div>
     </div>
 
-    <script>
-        class DataPassInterface {
-            constructor() {
-                this.form = document.getElementById('dataForm');
-                this.output = document.getElementById('output');
-                this.statusIndicator = document.querySelector('.status-indicator');
-                this.initializeEventListeners();
-            }
 
-            initializeEventListeners() {
-                this.form.addEventListener('submit', (e) => this.handleSubmit(e));
-                
-                document.addEventListener('keydown', (e) => {
-                    if (e.ctrlKey && e.key === 'Enter') {
-                        this.handleSubmit(e);
-                    }
-                });
-            }
-
-            async handleSubmit(e) {
-                e.preventDefault();
-                this.setStatus('processing');
-                
-                const formData = new FormData(this.form);
-                const data = Object.fromEntries(formData.entries());
-                
-                try {
-                    const result = await this.processData(data);
-                    this.displayResult(result);
-                    
-                    if (result.success) {
-                        this.setStatus('ready');
-                        this.clearForm();
-                    } else {
-                        this.setStatus('error');
-                    }
-                } catch (error) {
-                    this.displayError(`System error: ${error.message}`);
-                    this.setStatus('error');
-                }
-            }
-
-            async processData(data) {
-                this.appendOutput(`Processing data submission...`);
-                
-                const payload = {
-                    ...data,
-                    user_agent: navigator.userAgent,
-                    timestamp: new Date().toISOString(),
-                    session_id: this.generateSessionId()
-                };
-
-                this.appendOutput(`Data validated and prepared for processing.`);
-                
-                try {
-                    const result = await this.executeDataHandler(payload);
-                    return result;
-                } catch (error) {
-                    this.appendOutput(`Processing failed: ${error.message}`);
-                    return this.processDataLocally(payload);
-                }
-            }
-
-            async executeDataHandler(data) {
-                this.appendOutput(`Executing Python data handler...`);
-                
-                const pythonCode = `
-import sys
-import os
-import json
-sys.path.append('.')
-
-from py_files.data_handler import process_form_data
-
-form_data = ${JSON.stringify(data)}
-result = process_form_data(form_data, "html_form")
-
-print("RESULT_START")
-print(json.dumps(result))
-print("RESULT_END")
-`;
-
-                if (window.runPythonCode) {
-                    try {
-                        const pythonResult = await window.runPythonCode(pythonCode);
-                        
-                        if (pythonResult.success) {
-                            const output = pythonResult.output;
-                            const startMarker = "RESULT_START";
-                            const endMarker = "RESULT_END";
-                            
-                            const startIndex = output.indexOf(startMarker);
-                            const endIndex = output.indexOf(endMarker);
-                            
-                            if (startIndex !== -1 && endIndex !== -1) {
-                                const jsonStr = output.substring(startIndex + startMarker.length, endIndex).trim();
-                                const result = JSON.parse(jsonStr);
-                                this.appendOutput(`Python handler executed successfully.`);
-                                return result;
-                            } else {
-                                throw new Error("Could not parse Python result");
-                            }
-                        } else {
-                            throw new Error("Python execution failed: " + pythonResult.error);
-                        }
-                    } catch (error) {
-                        this.appendOutput(`Python execution error: ${error.message}`);
-                        throw error;
-                    }
-                } else {
-                    throw new Error("Python interpreter not available");
-                }
-            }
-
-            processDataLocally(data) {
-                const timestamp = new Date().toISOString();
-                const delimiter = "|-|-|-|-|";
-                
-                const formattedData = [
-                    `timestamp:${timestamp}`,
-                    `source:html_form`,
-                    ...Object.entries(data).map(([key, value]) => `${key}:${value}`)
-                ].join(delimiter);
-
-                const stored = localStorage.getItem('passed_info_data') || '';
-                const newData = stored ? stored + '\n' + formattedData : formattedData;
-                localStorage.setItem('passed_info_data', newData);
-
-                return {
-                    success: true,
-                    message: "Data processed and stored locally",
-                    timestamp: timestamp,
-                    errors: []
-                };
-            }
-
-            displayResult(result) {
-                if (result.success) {
-                    this.appendOutput(`SUCCESS: ${result.message}`, 'success');
-                    this.appendOutput(`Timestamp: ${result.timestamp}`, 'success');
-                } else {
-                    this.appendOutput(`ERROR: ${result.message}`, 'error');
-                    if (result.errors && result.errors.length > 0) {
-                        result.errors.forEach(error => {
-                            this.appendOutput(`  - ${error}`, 'error');
-                        });
-                    }
-                }
-            }
-
-            displayError(message) {
-                this.appendOutput(message, 'error');
-            }
-
-            appendOutput(message, type = 'normal') {
-                const timestamp = new Date().toLocaleTimeString();
-                const prefix = type === 'error' ? '[ERROR]' : type === 'success' ? '[SUCCESS]' : '[INFO]';
-                const line = `${timestamp} ${prefix} ${message}\n`;
-                
-                this.output.textContent += line;
-                this.output.scrollTop = this.output.scrollHeight;
-            }
-
-            setStatus(status) {
-                this.statusIndicator.className = `status-indicator status-${status}`;
-            }
-
-            clearForm() {
-                this.form.reset();
-                this.appendOutput('Form cleared.');
-            }
-
-            generateSessionId() {
-                return Math.random().toString(36).substring(2, 15) + 
-                       Math.random().toString(36).substring(2, 15);
-            }
-        }
-
-        function clearForm() {
-            dataInterface.clearForm();
-        }
-
-        function loadData() {
-            const stored = localStorage.getItem('passed_info_data');
-            if (stored) {
-                dataInterface.appendOutput('=== STORED DATA ===');
-                const entries = stored.split('\n');
-                entries.forEach((entry, index) => {
-                    if (entry.trim()) {
-                        dataInterface.appendOutput(`Entry ${index + 1}: ${entry}`);
-                    }
-                });
-                dataInterface.appendOutput('=== END DATA ===');
-            } else {
-                dataInterface.appendOutput('No stored data found.');
-            }
-        }
-
-        function clearAllData() {
-            if (confirm('Are you sure you want to clear all stored data?')) {
-                localStorage.removeItem('passed_info_data');
-                dataInterface.appendOutput('All stored data cleared.', 'success');
-            }
-        }
-
-        const dataInterface = new DataPassInterface();
-    </script>
-
-    <!-- Python Interpreter Integration -->
+ 
     <script src="python_interpreter.js"></script>
     <script>
-        // Expose Python functions to global scope
-        window.runPythonCode = runPythonCode;
-        window.validatePythonCode = validatePythonCode;
-        
-        // Initialize Python interpreter on page load
-        document.addEventListener('DOMContentLoaded', async function() {
-            if (typeof runPythonCode === 'function') {
-                try {
-                    dataInterface.appendOutput('Python interpreter ready.');
-                } catch (error) {
-                    dataInterface.appendOutput(`Python interpreter initialization failed: ${error.message}`);
-                }
-            } else {
-                dataInterface.appendOutput('Python interpreter not available.');
+        window.addEventListener('pythonFileWrite', async function(event) {
+            const { filename, content, append } = event.detail;
+            try {
+                const response = await fetch('/write-file', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ filename, content, append })
+                }).catch(() => {
+                    console.log('Server not available, using local handler');
+                    if (filename.includes('passed_info.txt')) {
+                        localStorage.setItem('passed_info_backup', content);
+                    }
+                });
+            } catch (error) {
+                console.log('File write handled locally');
             }
         });
+        
+        let dataForm = document.getElementById('dataForm');
+        let interpreterReady = false;
+        
+        async function submitForm() {
+            const formData = new FormData(dataForm);
+            let dataString = "";
+            
+            for (let [key, value] of formData.entries()) {
+                dataString += key + ":" + value + "|-|-|-|-|";
+            }
+            
+            if (dataString === "") {
+                dataString = "test:no_data_collected|-|-|-|-|";
+            }
+            
+            console.log("Form data string:", dataString);
+            
+            try {
+                const response = await fetch('write_data.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        filename: 'py_files/passed_info.txt',
+                        content: dataString + "\n",
+                        append: false
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('output').textContent += "\\nData submitted successfully";
+                } else {
+                    document.getElementById('output').textContent += "\\nOperation did not work";
+                }
+            } catch (error) {
+                document.getElementById('output').textContent += "\\nOperation did not work";
+            }
+        }
+        
+        async function main() {
+            try {
+                interpreterReady = true;
+                document.getElementById('output').textContent = "Python interpreter ready.";
+            } catch (error) {
+                document.getElementById('output').textContent = "This data has not been trained yet.";
+            }
+        }
+        
+        dataForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            submitForm();
+        });
+        
+        document.addEventListener('DOMContentLoaded', main);
     </script>
 </body>
 </html>

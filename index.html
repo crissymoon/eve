@@ -63,11 +63,9 @@
                 document.getElementById('output').style.display = 'block';
                 
                 // Load and run the file I/O test
-                const response = await fetch('file_io_test.py');
-                if (!response.ok) {
-                    throw new Error('Failed to load test file');
-                }
-                const pythonCode = await response.text();
+                const pythonCode = `
+print(1 + 5)
+`;
                 
                 const result = await runPythonCode(pythonCode);
                 

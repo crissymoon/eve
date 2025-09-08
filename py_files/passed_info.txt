@@ -1,7 +1,2 @@
-timestamp:2025-09-08T01:10:54.598574|-|-|-|-|source:login_system|-|-|-|-|user_name:John Doe|-|-|-|-|user_email:john.doe@example.com|-|-|-|-|action:login_attempt|-|-|-|-|ip_address:192.168.1.100|-|-|-|-|user_agent:Mozilla/5.0|-|-|-|-|status:success
-timestamp:2025-09-08T01:10:54.599797|-|-|-|-|source:payment_system|-|-|-|-|transaction_id:TXN_001|-|-|-|-|amount:299.99|-|-|-|-|currency:USD|-|-|-|-|payment_method:credit_card|-|-|-|-|merchant:XcaliburMoon Web Development|-|-|-|-|customer_email:customer@example.com
-timestamp:2025-09-08T01:10:54.601711|-|-|-|-|source:error_test|-|-|-|-|test:data
-timestamp:2025-09-08T01:11:29.097773|-|-|-|-|source:python_interpreter|-|-|-|-|interpreter_version:EVE_v1.0|-|-|-|-|execution_type:code_execution|-|-|-|-|user_session:browser_session|-|-|-|-|status:active|-|-|-|-|modules_loaded:sys,math,time,json,collections,random,os,io|-|-|-|-|features_used:file_io,standard_libs,error_handling
-timestamp:2025-09-08T01:11:29.098305|-|-|-|-|source:interpreter|-|-|-|-|event_type:code_execution|-|-|-|-|interpreter_system:EVE|-|-|-|-|code_lines:15|-|-|-|-|execution_time:0.245s|-|-|-|-|memory_usage:2.1MB|-|-|-|-|status:completed
-timestamp:2025-09-08T01:11:29.104920|-|-|-|-|source:interpreter_form|-|-|-|-|user_code:print('Hello from EVE interpreter')|-|-|-|-|execution_mode:immediate|-|-|-|-|user_id:guest_user|-|-|-|-|session_id:sess_12345|-|-|-|-|system:EVE_Python_Interpreter|-|-|-|-|processing_method:server_side_python|-|-|-|-|data_format:structured_form
-timestamp:2025-09-08T01:18:42.290945|-|-|-|-|source:command_line|-|-|-|-|test_field:test_value|-|-|-|-|user_name:John
+test_entry:test_value|-|-|-|-|
+name:Crissy A Deutsch|-|-|-|-|email:crissymoon711@gmail.com|-|-|-|-|phone:5622198083|-|-|-|-|category:contact|-|-|-|-|message:test|-|-|-|-|priority:medium|-|-|-|-|

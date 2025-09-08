@@ -18,6 +18,23 @@ class PythonInterpreter {
         this.initializeFileSystem();
     }
 
+    writeToRealFileSystem(filename, content, append = false) {
+        console.log('Writing to file:', filename, 'Content:', content);
+        return fetch('write_data.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({filename, content, append})
+        }).then(response => response.json())
+        .then(data => {
+            console.log('PHP write result:', data);
+            return data;
+        })
+        .catch(error => {
+            console.log('PHP write error:', error);
+            throw error;
+        });
+    }
+
     initializeBuiltins() {
         this.builtins.range = function(start, stop, step = 1) {
             if (stop === undefined) {
@@ -387,6 +404,9 @@ class PythonInterpreter {
                     modified: new Date()
                 });
                 
+                // Write to real file system
+                this.writeToRealFileSystem(filename, fileObj._content, mode.includes('a'));
+                
                 return strData.length;
             },
             
@@ -546,11 +566,18 @@ class PythonInterpreter {
         }
 
         try {
-            const modulePath = `${this.stdlibPath}${moduleName}.py`;
-            const response = await fetch(modulePath);
+            let modulePath = `${this.stdlibPath}${moduleName}.py`;
+            let response = await fetch(modulePath);
+            
+            if (!response.ok) {
+                modulePath = `py_files/${moduleName}.py`;
+                response = await fetch(modulePath);
+            }
+            
             if (!response.ok) {
                 throw new Error(`No module named '${moduleName}'`);
             }
+            
             const moduleCode = await response.text();
             const moduleObj = await this.createModuleObject(moduleName, moduleCode);
             this.modules.set(moduleName, moduleObj);
