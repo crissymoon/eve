@@ -307,26 +307,65 @@
                     session_id: this.generateSessionId()
                 };
 
-                this.appendOutput(`Data validated and prepared for transmission.`);
+                this.appendOutput(`Data validated and prepared for processing.`);
                 
                 try {
-                    const response = await fetch('/api/data-handler', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(payload)
-                    });
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
-
-                    const result = await response.json();
+                    const result = await this.executeDataHandler(payload);
                     return result;
-                } catch (fetchError) {
-                    this.appendOutput(`Network request failed. Using local processing...`);
+                } catch (error) {
+                    this.appendOutput(`Processing failed: ${error.message}`);
                     return this.processDataLocally(payload);
+                }
+            }
+
+            async executeDataHandler(data) {
+                this.appendOutput(`Executing Python data handler...`);
+                
+                const pythonCode = `
+import sys
+import os
+import json
+sys.path.append('.')
+
+from py_files.data_handler import process_form_data
+
+form_data = ${JSON.stringify(data)}
+result = process_form_data(form_data, "html_form")
+
+print("RESULT_START")
+print(json.dumps(result))
+print("RESULT_END")
+`;
+
+                if (window.runPythonCode) {
+                    try {
+                        const pythonResult = await window.runPythonCode(pythonCode);
+                        
+                        if (pythonResult.success) {
+                            const output = pythonResult.output;
+                            const startMarker = "RESULT_START";
+                            const endMarker = "RESULT_END";
+                            
+                            const startIndex = output.indexOf(startMarker);
+                            const endIndex = output.indexOf(endMarker);
+                            
+                            if (startIndex !== -1 && endIndex !== -1) {
+                                const jsonStr = output.substring(startIndex + startMarker.length, endIndex).trim();
+                                const result = JSON.parse(jsonStr);
+                                this.appendOutput(`Python handler executed successfully.`);
+                                return result;
+                            } else {
+                                throw new Error("Could not parse Python result");
+                            }
+                        } else {
+                            throw new Error("Python execution failed: " + pythonResult.error);
+                        }
+                    } catch (error) {
+                        this.appendOutput(`Python execution error: ${error.message}`);
+                        throw error;
+                    }
+                } else {
+                    throw new Error("Python interpreter not available");
                 }
             }
 
@@ -422,6 +461,27 @@
         }
 
         const dataInterface = new DataPassInterface();
+    </script>
+
+    <!-- Python Interpreter Integration -->
+    <script src="python_interpreter.js"></script>
+    <script>
+        // Expose Python functions to global scope
+        window.runPythonCode = runPythonCode;
+        window.validatePythonCode = validatePythonCode;
+        
+        // Initialize Python interpreter on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (typeof runPythonCode === 'function') {
+                try {
+                    dataInterface.appendOutput('Python interpreter ready.');
+                } catch (error) {
+                    dataInterface.appendOutput(`Python interpreter initialization failed: ${error.message}`);
+                }
+            } else {
+                dataInterface.appendOutput('Python interpreter not available.');
+            }
+        });
     </script>
 </body>
 </html>

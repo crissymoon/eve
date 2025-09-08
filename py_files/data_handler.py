@@ -9,10 +9,10 @@ from pathlib import Path
 
 class DataPassHandler:
     
-    def __init__(self, target_file: str = "py_files/passed_info.txt") -> None:
+    def __init__(self, target_file: str = "passed_info.txt") -> None:
         self.target_file: str = target_file
         self.delimiter: str = "|-|-|-|-|"
-        self.base_dir: Path = Path(__file__).parent.parent
+        self.base_dir: Path = Path(__file__).parent
         self.full_path: Path = self.base_dir / target_file
         self.validation_rules: Dict[str, Any] = {}
         self.error_log: List[str] = []
@@ -140,7 +140,7 @@ class DataPassHandler:
     def clear_errors(self) -> None:
         self.error_log.clear()
 
-def process_form_data(form_data: Dict[str, Any], source: str = "html_form", target_file: str = "py_files/passed_info.txt") -> Dict[str, Any]:
+def process_form_data(form_data: Dict[str, Any], source: str = "html_form", target_file: str = "passed_info.txt") -> Dict[str, Any]:
     handler = DataPassHandler(target_file)
     
     success = handler.write_data(form_data, source)
